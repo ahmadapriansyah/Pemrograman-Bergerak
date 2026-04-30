@@ -10,102 +10,96 @@
             background: #f4f4f4;
             padding: 20px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-top: 20px;
         }
+
         th, td {
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
             text-align: left;
         }
+
         th {
-            background: #007bff; /* Warna biru seperti desain aslimu */
+            background: #007bff;
             color: white;
         }
-        h2 { color: #333; }
-        .loading { font-style: italic; color: #888; text-align: center; }
+
+        h2 {
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Data Mahasiswa (Versi Supabase)</h2>
-    <p>Aplikasi ini mengambil data langsung dari Supabase tanpa menggunakan PHP.</p>
+<h2>Data Mahasiswa</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nama</th>
-                <th>NIM</th>
-                <th>Jurusan</th>
-            </tr>
-        </thead>
-        <tbody id="hasil">
-            <tr><td colspan="4" class="loading">Sedang mengambil data dari database...</td></tr>
-        </tbody>
-    </table>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>NIM</th>
+            <th>Jurusan</th>
+        </tr>
+    </thead>
+    <tbody id="hasil">
+        <tr><td colspan="4" style="text-align: center; font-style: italic;">Memuat data...</td></tr>
+    </tbody>
+</table>
 
-    <script>
-        // 1. SETTING KONEKSI SUPABASE
-        // Ganti URL di bawah ini dengan Project URL dari Supabase kamu
-        // Contoh bentuknya: 'https://abcdefghijklmnopq.supabase.co'
-        const SUPABASE_URL = 'https://psdwpdlwnxxxcqhgjnmw.supabase.co'; 
-        
-        // Ini adalah Kunci Publikasi yang sudah kamu berikan
-        const SUPABASE_KEY = 'sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa'; 
+<script>
+    // URL dan Key milikmu sudah dipasang di sini
+    const SUPABASE_URL = 'https://psdwpdlwnxxxcqhgjnmw.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa'; 
 
-        // 2. FUNGSI MENGAMBIL DATA (PENGGANTI api_mahasiswa.php)
-        async function ambilDataMahasiswa() {
-            try {
-                // Fetch API ini menggantikan fungsi SELECT * FROM mahasiswa
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/mahasiswa?select=*`, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error("Gagal mengambil data dari Supabase");
+    async function ambilDataMahasiswa() {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/mahasiswa?select=*`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
                 }
+            });
 
-                const data = await response.json();
-                let output = "";
-
-                // 3. MENAMPILKAN DATA KE TABEL (PENGGANTI tampil.php)
-                if (data.length === 0) {
-                    output = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di tabel mahasiswa.</td></tr>";
-                } else {
-                    data.forEach(item => {
-                        output += `
-                            <tr>
-                                <td>${item.id}</td>
-                                <td>${item.nama}</td>
-                                <td>${item.nim}</td>
-                                <td>${item.jurusan || '-'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-
-                // Masukkan hasil kodingan ke dalam tabel HTML
-                document.getElementById("hasil").innerHTML = output;
-
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById("hasil").innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>Error: Gagal koneksi ke database. Pastikan URL Supabase sudah benar.</td></tr>";
+            if (!response.ok) {
+                throw new Error("Gagal mengambil data dari Supabase");
             }
-        }
 
-        // Jalankan fungsi saat web dibuka
-        ambilDataMahasiswa();
-    </script>
+            const data = await response.json();
+            let output = "";
+
+            if (data.length === 0) {
+                output = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di database.</td></tr>";
+            } else {
+                data.forEach(item => {
+                    output += `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.nama}</td>
+                            <td>${item.nim}</td>
+                            <td>${item.jurusan || '-'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById("hasil").innerHTML = output;
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById("hasil").innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>Error: Gagal koneksi ke database.</td></tr>";
+        }
+    }
+
+    // Jalankan fungsi saat web dibuka
+    ambilDataMahasiswa();
+</script>
 
 </body>
 </html>

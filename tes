@@ -1,62 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Data Mahasiswa (Narik dari Firebase Teman)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Mahasiswa (Ultimate)</title>
     <style>
-        body { font-family: Arial; background:#f4f4f4; padding:20px; }
-        table { width:100%; border-collapse: collapse; background:white; }
-        th, td { padding:10px; border:1px solid #ddd; text-align:left; text-transform: capitalize; }
-        th { background:#007bff; color:white; }
-        h2 { color:#333; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; text-transform: capitalize; }
+        th { background: #007bff; color: white; }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .tabel-rio th { background: #e74c3c; } /* Warna merah biar beda buat tabel Rio */
     </style>
 </head>
 <body>
 
-<h2>Data Mahasiswa (Narik Punya Rio)</h2>
+    <h2>😎 Data Database Gue (Supabase)</h2>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Nama</th><th>NIM</th><th>Jurusan</th></tr>
+        </thead>
+        <tbody id="hasil-gue">
+            <tr><td colspan="4" style="text-align: center;">Memuat data gue...</td></tr>
+        </tbody>
+    </table>
 
-<table>
-    <thead>
-        <tr>
-            <th>Kategori / Field</th>
-            <th>Isi Data</th>
-        </tr>
-    </thead>
-    <tbody id="hasil">
-        <tr><td colspan="2" style="text-align: center;">Membobol data teman... 🕵️‍♂️</td></tr>
-    </tbody>
-</table>
+    <h2>🕵️‍♂️ Data Nyedot API Rio (Firebase)</h2>
+    <table class="tabel-rio">
+        <thead>
+            <tr><th>Kategori / Field</th><th>Isi Data</th></tr>
+        </thead>
+        <tbody id="hasil-rio">
+            <tr><td colspan="2" style="text-align: center;">Membobol data Rio...</td></tr>
+        </tbody>
+    </table>
 
-<script>
-// Ini link API rahasia dari Firebase teman lu
-const API_RIO = 'https://tugas-rio-default-rtdb.asia-southeast1.firebasedatabase.app/.json';
+    <script>
+        // ==========================================
+        // 1. MESIN BUAT NARIK DATA GUE (SUPABASE)
+        // ==========================================
+        const SUPABASE_URL = 'https://psdwpdlwnxxxcqhgjnmw.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa'; 
 
-fetch(API_RIO)
-.then(response => response.json())
-.then(data => {
-    let output = "";
+        fetch(`${SUPABASE_URL}/rest/v1/mahasiswa?select=*`, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            let output = "";
+            if (data.length === 0) {
+                output = "<tr><td colspan='4'>Belum ada data.</td></tr>";
+            } else {
+                data.forEach(item => {
+                    output += `<tr><td>${item.id}</td><td>${item.nama}</td><td>${item.nim}</td><td>${item.jurusan || '-'}</td></tr>`;
+                });
+            }
+            document.getElementById("hasil-gue").innerHTML = output;
+        });
 
-    // Karena data Firebase Rio bentuknya objek (kategori: isi), kita looping pakai cara ini:
-    if (data) {
-        for (const [kategori, isi] of Object.entries(data)) {
-            output += `
-                <tr>
-                    <td><b>${kategori}</b></td>
-                    <td>${isi}</td>
-                </tr>
-            `;
-        }
-    } else {
-        output = "<tr><td colspan='2'>Yah, database Rio lagi kosong bro.</td></tr>";
-    }
+        // ==========================================
+        // 2. MESIN BUAT NARIK DATA RIO (FIREBASE)
+        // ==========================================
+        const API_RIO = 'https://tugas-rio-default-rtdb.asia-southeast1.firebasedatabase.app/.json';
 
-    // Tampilkan ke tabel web lu
-    document.getElementById("hasil").innerHTML = output;
-})
-.catch(error => {
-    console.error('Error:', error);
-    document.getElementById("hasil").innerHTML = "<tr><td colspan='2' style='color:red;'>Gagal ditarik. Kayaknya Firebase dia dikunci (Private).</td></tr>";
-});
-</script>
+        fetch(API_RIO)
+        .then(res => res.json())
+        .then(data => {
+            let output = "";
+            if (data) {
+                for (const [kategori, isi] of Object.entries(data)) {
+                    output += `<tr><td><b>${kategori}</b></td><td>${isi}</td></tr>`;
+                }
+            } else {
+                output = "<tr><td colspan='2'>Database Rio kosong.</td></tr>";
+            }
+            document.getElementById("hasil-rio").innerHTML = output;
+        });
+    </script>
 
 </body>
 </html>

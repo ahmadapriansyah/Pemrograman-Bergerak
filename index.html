@@ -2,35 +2,92 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Ahmad Apriansyah</title>
+    <title>Data Mahasiswa (Pro Version)</title>
     <style>
         body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
         }
-        .card {
+        table {
+            width: 100%;
+            border-collapse: collapse;
             background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        h1 { color: #2ecc71; }
-        p { color: #666; }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #2ecc71; /* Warna hijau biar beda dari yang standar */
+            color: white;
+        }
+        h2 { color: #333; }
+        .loading { font-style: italic; color: #888; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Hosting Berhasil Aktif!</h1>
-        <p>Selamat, website <strong>Ahmad Apriansyah</strong> sudah online di GitHub Pages.</p>
-        <hr>
-        <p>Proyek: Pemrograman Bergerak</p>
-    </div>
+
+<h2>Data Mahasiswa (Powered by Supabase)</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>NIM</th>
+            <th>Jurusan</th>
+        </tr>
+    </thead>
+    <tbody id="hasil">
+        <tr><td colspan="4" class="loading">Mengambil data dari server...</td></tr>
+    </tbody>
+</table>
+
+<script>
+// --- ISI BAGIAN INI DENGAN DATA DARI SUPABASE-MU ---
+const SUPABASE_URL = 'https://psdwpdlwnxxxcqhgjnmw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa';
+// ----------------------------------------------------
+
+// Kita panggil API Supabase untuk tabel 'mahasiswa'
+fetch(`${SUPABASE_URL}/rest/v1/mahasiswa?select=*`, {
+    headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+    }
+})
+.then(response => response.json())
+.then(data => {
+    let output = "";
+
+    // Jika tabel kosong
+    if(data.length === 0) {
+        output = "<tr><td colspan='4'>Belum ada data mahasiswa.</td></tr>";
+    }
+
+    // Looping data dari Supabase
+    data.forEach(item => {
+        output += `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.nama}</td>
+                <td>${item.nim}</td>
+                <td>${item.jurusan}</td>
+            </tr>
+        `;
+    });
+
+    // Tampilkan ke tabel
+    document.getElementById("hasil").innerHTML = output;
+})
+.catch(error => {
+    console.error('Error:', error);
+    document.getElementById("hasil").innerHTML = "<tr><td colspan='4'>Gagal mengambil data. Cek URL dan Key Supabase.</td></tr>";
+});
+</script>
+
 </body>
 </html>

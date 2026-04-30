@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Mahasiswa (Narik dari Firebase Teman)</title>
+    <style>
+        body { font-family: Arial; background:#f4f4f4; padding:20px; }
+        table { width:100%; border-collapse: collapse; background:white; }
+        th, td { padding:10px; border:1px solid #ddd; text-align:left; text-transform: capitalize; }
+        th { background:#007bff; color:white; }
+        h2 { color:#333; }
+    </style>
+</head>
+<body>
+
+<h2>Data Mahasiswa (Narik Punya Rio)</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Kategori / Field</th>
+            <th>Isi Data</th>
+        </tr>
+    </thead>
+    <tbody id="hasil">
+        <tr><td colspan="2" style="text-align: center;">Membobol data teman... 🕵️‍♂️</td></tr>
+    </tbody>
+</table>
+
+<script>
+// Ini link API rahasia dari Firebase teman lu
+const API_RIO = 'https://tugas-rio-default-rtdb.asia-southeast1.firebasedatabase.app/.json';
+
+fetch(API_RIO)
+.then(response => response.json())
+.then(data => {
+    let output = "";
+
+    // Karena data Firebase Rio bentuknya objek (kategori: isi), kita looping pakai cara ini:
+    if (data) {
+        for (const [kategori, isi] of Object.entries(data)) {
+            output += `
+                <tr>
+                    <td><b>${kategori}</b></td>
+                    <td>${isi}</td>
+                </tr>
+            `;
+        }
+    } else {
+        output = "<tr><td colspan='2'>Yah, database Rio lagi kosong bro.</td></tr>";
+    }
+
+    // Tampilkan ke tabel web lu
+    document.getElementById("hasil").innerHTML = output;
+})
+.catch(error => {
+    console.error('Error:', error);
+    document.getElementById("hasil").innerHTML = "<tr><td colspan='2' style='color:red;'>Gagal ditarik. Kayaknya Firebase dia dikunci (Private).</td></tr>";
+});
+</script>
+
+</body>
+</html>

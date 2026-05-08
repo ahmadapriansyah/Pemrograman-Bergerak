@@ -2,104 +2,99 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Mahasiswa</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
+            background-color: #f4f4f4;
+            margin: 20px;
         }
-
+        h2 {
+            color: #333;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
         th {
-            background: #007bff;
+            background-color: #007bff; /* Biru sesuai gambar */
             color: white;
+            text-align: left;
+            padding: 12px;
         }
-
-        h2 {
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
             color: #333;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
 
-<h2>Data Mahasiswa</h2>
+    <h2>Data Mahasiswa</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nama</th>
-            <th>NIM</th>
-            <th>Jurusan</th>
-        </tr>
-    </thead>
-    <tbody id="hasil">
-        <tr><td colspan="4" style="text-align: center; font-style: italic;">Memuat data...</td></tr>
-    </tbody>
-</table>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>NIM</th>
+                <th>Jurusan</th>
+                <th>Mata Kuliah</th>
+                <th>Nilai</th>
+            </tr>
+        </thead>
+        <tbody id="data-mahasiswa">
+            </tbody>
+    </table>
 
-<script>
-    // URL dan Key milikmu sudah dipasang di sini
-    const SUPABASE_URL = 'https://psdwpdlwnxxxcqhgjnmw.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa'; 
+    <script>
+        // 1. Ganti dengan URL Supabase kamu (Arahkan ke view tugas_3 yang kita buat tadi)
+        const url = "https://URL_PROJECT_KAMU.supabase.co/rest/v1/tugas_3?select=*";
+        
+        // 2. Ganti dengan API Key (anon) Supabase kamu
+        const apiKey = "API_KEY_ANON_KAMU";
 
-    async function ambilDataMahasiswa() {
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/mahasiswa?select=*`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                }
+        // Mengambil data dari Supabase (Ini pengganti file_get_contents di PHP)
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'apikey': apiKey,
+                'Authorization': 'Bearer ' + apiKey
+            }
+        })
+        .then(response => response.json())
+        .then(mahasiswa => {
+            const tbody = document.getElementById('data-mahasiswa');
+            let barisHTML = '';
+
+            // Ini pengganti foreach ($mahasiswa as $m) di PHP
+            mahasiswa.forEach(m => {
+                barisHTML += `
+                <tr>
+                    <td>${m.id || '-'}</td>
+                    <td>${m.nama || '-'}</td>
+                    <td>${m.nim || '-'}</td>
+                    <td>${m.jurusan || '-'}</td>
+                    <td>${m.mata_kuliah || '-'}</td>
+                    <td>${m.nilai || '-'}</td>
+                </tr>
+                `;
             });
 
-            if (!response.ok) {
-                throw new Error("Gagal mengambil data dari Supabase");
-            }
-
-            const data = await response.json();
-            let output = "";
-
-            if (data.length === 0) {
-                output = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di database.</td></tr>";
-            } else {
-                data.forEach(item => {
-                    output += `
-                        <tr>
-                            <td>${item.id}</td>
-                            <td>${item.nama}</td>
-                            <td>${item.nim}</td>
-                            <td>${item.jurusan || '-'}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            document.getElementById("hasil").innerHTML = output;
-
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById("hasil").innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>Error: Gagal koneksi ke database.</td></tr>";
-        }
-    }
-
-    // Jalankan fungsi saat web dibuka
-    ambilDataMahasiswa();
-</script>
+            // Memasukkan baris yang sudah dibuat ke dalam tabel
+            tbody.innerHTML = barisHTML;
+        })
+        .catch(error => {
+            console.error('Error mengambil data:', error);
+            document.getElementById('data-mahasiswa').innerHTML = '<tr><td colspan="6">Gagal memuat data.</td></tr>';
+        });
+    </script>
 
 </body>
 </html>

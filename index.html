@@ -4,39 +4,28 @@
     <meta charset="UTF-8">
     <title>Data Mahasiswa</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        th {
-            background-color: #007bff; /* Biru sesuai gambar */
-            color: white;
-            text-align: left;
-            padding: 12px;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            color: #333;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; }
+        h2 { color: #333; }
+        .nav { margin-bottom: 20px; }
+        .nav a { text-decoration: none; padding: 10px 15px; background: #333; color: #fff; border-radius: 4px; font-size: 14px; margin-right: 5px; }
+        .nav a:hover { background: #007bff; }
+        table { width: 100%; border-collapse: collapse; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th { background-color: #007bff; color: white; text-align: left; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; color: #333; }
+        tr:hover { background-color: #f9f9f9; }
     </style>
 </head>
 <body>
 
-    <h2>Data Mahasiswa</h2>
+    <h2 id="judul">Data Mahasiswa - Tugas 1</h2>
+
+    <div class="nav">
+        <a href="?no=1">Tugas 1</a>
+        <a href="?no=2">Tugas 2</a>
+        <a href="?no=3">Tugas 3</a>
+        <a href="?no=4">Tugas 4</a>
+        <a href="?no=5">Tugas 5</a>
+    </div>
 
     <table>
         <thead>
@@ -50,49 +39,74 @@
             </tr>
         </thead>
         <tbody id="data-mahasiswa">
-            </tbody>
+            <tr><td colspan="6">Loading data...</td></tr>
+        </tbody>
     </table>
 
     <script>
-        // 1. Ganti dengan URL Supabase kamu (Arahkan ke view tugas_3 yang kita buat tadi)
-        const url = "https://psdwpdlwnxxxcqhgjnmw.supabase.co";
-        
-        // 2. Ganti dengan API Key (anon) Supabase kamu
+        // --- BAGIAN INI WAJIB DIGANTI DENGAN MILIKMU ---
+        const supabaseUrl = "https://psdwpdlwnxxxcqhgjnmw.supabase.co";
         const apiKey = "sb_publishable_nD4WmWYpgvhB_NkcGB4yNg_pTCAlvIa";
+        // -----------------------------------------------
 
-        // Mengambil data dari Supabase (Ini pengganti file_get_contents di PHP)
-        fetch(url, {
+        // Ambil nomor tugas dari URL (?no=3)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tugas = urlParams.get('no') || '1';
+        
+        // Ubah judul sesuai nomor tugas
+        document.getElementById('judul').innerText = "Data Mahasiswa - Tugas " + tugas;
+
+        // Tentukan tabel/view mana yang dipanggil berdasarkan tugas
+        let endpoint = "";
+        if (tugas === '1') {
+            endpoint = "mahasiswa?select=id,nama,nim,jurusan";
+        } else if (tugas === '2') {
+            endpoint = "nilai?select=mata_kuliah,nilai";
+        } else if (tugas === '3') {
+            endpoint = "tugas_3?select=id,nama,nim,mata_kuliah,nilai";
+        } else if (tugas === '4') {
+            endpoint = "tugas_3?select=*&order=jurusan.asc";
+        } else if (tugas === '5') {
+            endpoint = "tugas_5?select=*";
+        }
+
+        // Panggil API Supabase
+        fetch(supabaseUrl + endpoint, {
             method: 'GET',
             headers: {
                 'apikey': apiKey,
                 'Authorization': 'Bearer ' + apiKey
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("Gagal mengambil data dari Supabase");
+            return response.json();
+        })
         .then(mahasiswa => {
             const tbody = document.getElementById('data-mahasiswa');
             let barisHTML = '';
 
-            // Ini pengganti foreach ($mahasiswa as $m) di PHP
-            mahasiswa.forEach(m => {
-                barisHTML += `
-                <tr>
-                    <td>${m.id || '-'}</td>
-                    <td>${m.nama || '-'}</td>
-                    <td>${m.nim || '-'}</td>
-                    <td>${m.jurusan || '-'}</td>
-                    <td>${m.mata_kuliah || '-'}</td>
-                    <td>${m.nilai || '-'}</td>
-                </tr>
-                `;
-            });
-
-            // Memasukkan baris yang sudah dibuat ke dalam tabel
+            if (mahasiswa.length === 0) {
+                barisHTML = '<tr><td colspan="6">Data tidak ditemukan.</td></tr>';
+            } else {
+                mahasiswa.forEach(m => {
+                    barisHTML += `
+                    <tr>
+                        <td>${m.id || '-'}</td>
+                        <td>${m.nama || '-'}</td>
+                        <td>${m.nim || '-'}</td>
+                        <td>${m.jurusan || '-'}</td>
+                        <td>${m.mata_kuliah || '-'}</td>
+                        <td>${m.nilai || '-'}</td>
+                    </tr>
+                    `;
+                });
+            }
             tbody.innerHTML = barisHTML;
         })
         .catch(error => {
-            console.error('Error mengambil data:', error);
-            document.getElementById('data-mahasiswa').innerHTML = '<tr><td colspan="6">Gagal memuat data.</td></tr>';
+            console.error('Error:', error);
+            document.getElementById('data-mahasiswa').innerHTML = `<tr><td colspan="6" style="color:red;">Error: Gagal memuat data. Pastikan URL dan API Key benar.</td></tr>`;
         });
     </script>
 
